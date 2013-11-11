@@ -5,7 +5,9 @@ module Hue
   class Client
     attr_reader :username
 
-    def initialize(username = '1234567890')
+    def initialize(username = '1234567890', bridge_id = nil)
+      @bridge_id = bridge_id
+
       unless USERNAME_RANGE.include?(username.length)
         raise InvalidUsername, "Usernames must be between #{USERNAME_RANGE.first} and #{USERNAME_RANGE.last}."
       end
@@ -17,6 +19,11 @@ module Hue
     def bridge
       # Pick the first one for now. In theory, they should all do the same thing.
       bridge = bridges.first
+
+      unless @bridge_id.nil?
+        bridge = bridges.select{|b| b.id == @bridge_id }.first
+      end
+
       raise NoBridgeFound unless bridge
       bridge
     end
@@ -82,6 +89,10 @@ module Hue
         parse_error(error)
       end
       response['success']
+    end
+
+    def validate_bridge_id
+
     end
 
     def parse_error(error)
